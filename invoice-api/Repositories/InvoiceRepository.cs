@@ -121,7 +121,7 @@ namespace invoice_api.Repositories
 
                 return invoice;
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }            
@@ -152,7 +152,7 @@ namespace invoice_api.Repositories
                     return (command.ExecuteNonQuery() == 1) ? invoice : null;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
@@ -185,7 +185,7 @@ namespace invoice_api.Repositories
                     return (command.ExecuteNonQuery() == 1) ? invoice : null;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }

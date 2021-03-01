@@ -50,6 +50,28 @@ namespace invoice_api.Controllers
             return Ok(invoice);
         }
 
+        [HttpPatch("{id}")]
+        public ActionResult<Invoice> Patch(int id, [FromBody] Invoice patchInvoice)
+        {
+            var invoice = InvoiceRepository.Get(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            invoice.ReferenceMonth = patchInvoice.ReferenceMonth != 0 ? patchInvoice.ReferenceMonth : invoice.ReferenceMonth;
+            invoice.ReferenceYear = patchInvoice.ReferenceYear != 0 ? patchInvoice.ReferenceYear : invoice.ReferenceYear;
+            invoice.Document = !string.IsNullOrEmpty(patchInvoice.Document) ? patchInvoice.Document : invoice.Document;
+            invoice.Description = !string.IsNullOrEmpty(patchInvoice.Description) ? patchInvoice.Description : invoice.Description;
+            invoice.Amount = patchInvoice.Amount != 0 ? patchInvoice.Amount : invoice.Amount;
+
+            invoice = InvoiceRepository.Update(invoice);
+
+            if (invoice == null)
+                return BadRequest();
+
+            return Ok(invoice);
+        }
+
         [HttpDelete("{id}")]
         public ActionResult<Invoice> Delete(int id)
         {
