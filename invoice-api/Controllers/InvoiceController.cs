@@ -16,5 +16,16 @@ namespace invoice_api.Controllers
 
             return Ok(invoices);
         }
+
+        [HttpGet("{id}")]
+        public ActionResult<Invoice> Get(int id)
+        {
+            var invoice = InvoiceRepository.Get(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            return Ok(invoice);
+        }
     }
 }

@@ -68,6 +68,33 @@ namespace invoice_api.Repositories
             return invoices;
         }
 
+        public static Invoice Get(int id)
+        {
+            var invoice = new Invoice();
+
+            using (var connection = DbConnection())
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText = @"SELECT * FROM invoice WHERE Id = $id";
+                command.Parameters.AddWithValue("$id", id);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.HasRows)
+                        return null;
+
+                    while (reader.Read())
+                    {
+                        invoice = MapInvoice(reader);
+                    }
+                }
+            }
+
+            return invoice;
+        }
+
         private static Invoice MapInvoice(SqliteDataReader reader)
         {
             var invoice = new Invoice();
