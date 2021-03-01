@@ -27,5 +27,16 @@ namespace invoice_api.Controllers
 
             return Ok(invoice);
         }
+
+        [HttpPost]
+        public ActionResult<Invoice> Post([FromBody] Invoice invoice)
+        {
+            invoice = InvoiceRepository.Post(invoice);
+
+            if (invoice == null)
+                return BadRequest();
+
+            return Created("/invoice/" + invoice.Id, invoice);
+        }
     }
 }

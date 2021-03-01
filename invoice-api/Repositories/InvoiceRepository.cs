@@ -23,9 +23,9 @@ namespace invoice_api.Repositories
         {
             try
             {
-                using (var cmd = _sqliteConnection.CreateCommand())
+                using (var command = _sqliteConnection.CreateCommand())
                 {
-                    cmd.CommandText = @"CREATE TABLE IF NOT EXISTS Invoice (
+                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Invoice (
                                             Id integer PRIMARY KEY AUTOINCREMENT,
                                             ReferenceMonth integer NOT NULL,
                                             ReferenceYear integer NOT NULL,
@@ -36,7 +36,7 @@ namespace invoice_api.Repositories
                                             CreatedAt datetime NOT NULL,
                                             DeactivatedAt datetime
                                         )";
-                    cmd.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -51,8 +51,6 @@ namespace invoice_api.Repositories
 
             using (var connection = DbConnection())
             {
-                connection.Open();
-
                 var command = connection.CreateCommand();
                 command.CommandText = @"SELECT * FROM invoice";
 
@@ -74,8 +72,6 @@ namespace invoice_api.Repositories
 
             using (var connection = DbConnection())
             {
-                connection.Open();
-
                 var command = connection.CreateCommand();
                 command.CommandText = @"SELECT * FROM invoice WHERE Id = $id";
                 command.Parameters.AddWithValue("$id", id);
@@ -93,6 +89,42 @@ namespace invoice_api.Repositories
             }
 
             return invoice;
+        }
+
+        public static Invoice Post(Invoice invoice)
+        {
+            try
+            {
+                invoice.IsActive = true;
+                invoice.CreatedAt = DateTime.Now;
+
+                using (var connection = DbConnection())
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = @"INSERT INTO Invoice
+                                            (ReferenceMonth, ReferenceYear, Document, Description, Amount, IsActive, CreatedAt)
+                                            values ($ReferenceMonth, $ReferenceYear, $Document, $Description, $Amount, $IsActive, $CreatedAt)";
+
+                    command.Parameters.AddWithValue("$ReferenceMonth", invoice.ReferenceMonth);
+                    command.Parameters.AddWithValue("$ReferenceYear", invoice.ReferenceYear);
+                    command.Parameters.AddWithValue("$Document", invoice.Document);
+                    command.Parameters.AddWithValue("$Description", invoice.Description);
+                    command.Parameters.AddWithValue("$Amount", invoice.Amount);
+                    command.Parameters.AddWithValue("$IsActive", invoice.IsActive);
+                    command.Parameters.AddWithValue("$CreatedAt", invoice.CreatedAt);
+
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = "SELECT LAST_INSERT_ROWID();";
+                    invoice.Id = Convert.ToInt32(command.ExecuteScalar());
+                }
+
+                return invoice;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }            
         }
 
         private static Invoice MapInvoice(SqliteDataReader reader)
