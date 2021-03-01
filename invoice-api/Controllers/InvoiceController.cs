@@ -1,4 +1,5 @@
 ﻿using invoice_api.Models;
+using invoice_api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
@@ -11,7 +12,9 @@ namespace invoice_api.Controllers
         [HttpGet]
         public ActionResult<List<Invoice>> Get()
         {
-            return Ok(new List<Invoice>());
+            var invoices = InvoiceRepository.Get();
+
+            return Ok(invoices);
         }
     }
 }

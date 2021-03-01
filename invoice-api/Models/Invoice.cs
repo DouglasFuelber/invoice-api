@@ -12,6 +12,6 @@ namespace invoice_api.Models
         public decimal Amount { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime DeactivatedAt { get; set; }
+        public DateTime? DeactivatedAt { get; set; }
     }
 }
