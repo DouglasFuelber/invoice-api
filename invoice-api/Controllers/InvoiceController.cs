@@ -38,5 +38,30 @@ namespace invoice_api.Controllers
 
             return Created("/invoice/" + invoice.Id, invoice);
         }
+
+        [HttpPut]
+        public ActionResult<Invoice> Put([FromBody] Invoice invoice)
+        {
+            invoice = InvoiceRepository.Update(invoice);
+
+            if (invoice == null)
+                return BadRequest();
+
+            return Ok(invoice);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<Invoice> Delete(int id)
+        {
+            var invoice = InvoiceRepository.Delete(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            if (invoice.IsActive && invoice.DeactivatedAt != null)
+                return BadRequest();
+
+            return Accepted(invoice);
+        }
     }
 }

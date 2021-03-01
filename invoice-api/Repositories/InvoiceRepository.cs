@@ -52,7 +52,7 @@ namespace invoice_api.Repositories
             using (var connection = DbConnection())
             {
                 var command = connection.CreateCommand();
-                command.CommandText = @"SELECT * FROM invoice";
+                command.CommandText = @"SELECT * FROM invoice WHERE IsActive = 1";
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -73,7 +73,7 @@ namespace invoice_api.Repositories
             using (var connection = DbConnection())
             {
                 var command = connection.CreateCommand();
-                command.CommandText = @"SELECT * FROM invoice WHERE Id = $id";
+                command.CommandText = @"SELECT * FROM invoice WHERE Id = $id AND IsActive = 1";
                 command.Parameters.AddWithValue("$id", id);
 
                 using (var reader = command.ExecuteReader())
@@ -125,6 +125,70 @@ namespace invoice_api.Repositories
             {
                 return null;
             }            
+        }
+
+        public static Invoice Update (Invoice invoice)
+        {
+            try
+            {
+                using (var connection = DbConnection())
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = @"UPDATE Invoice SET
+                                                ReferenceMonth = $ReferenceMonth,
+                                                ReferenceYear = $ReferenceYear,
+                                                Document = $Document,
+                                                Description = $Description,
+                                                Amount = $Amount
+                                            WHERE Id = $Id;";
+
+                    command.Parameters.AddWithValue("$ReferenceMonth", invoice.ReferenceMonth);
+                    command.Parameters.AddWithValue("$ReferenceYear", invoice.ReferenceYear);
+                    command.Parameters.AddWithValue("$Document", invoice.Document);
+                    command.Parameters.AddWithValue("$Description", invoice.Description);
+                    command.Parameters.AddWithValue("$Amount", invoice.Amount);
+                    command.Parameters.AddWithValue("$Id", invoice.Id);
+
+                    return (command.ExecuteNonQuery() == 1) ? invoice : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public static Invoice Delete(int id)
+        {
+            try
+            {
+                var invoice = Get(id);
+
+                if (invoice == null)
+                    return null;
+
+                invoice.IsActive = false;
+                invoice.DeactivatedAt = DateTime.Now;
+
+                using (var connection = DbConnection())
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = @"UPDATE Invoice SET
+                                                IsActive = $IsActive,
+                                                DeactivatedAt = $DeactivatedAt
+                                            WHERE Id = $Id;";
+
+                    command.Parameters.AddWithValue("$IsActive", invoice.IsActive);
+                    command.Parameters.AddWithValue("$DeactivatedAt", invoice.DeactivatedAt);
+                    command.Parameters.AddWithValue("$Id", invoice.Id);
+
+                    return (command.ExecuteNonQuery() == 1) ? invoice : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         private static Invoice MapInvoice(SqliteDataReader reader)
